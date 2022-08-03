@@ -29,10 +29,11 @@ public class EmailSender : IEmailSender
 
     public async Task Execute(string apiKey, string subject, string message, string toEmail)
     {
+        var fromSendGridApprovedEmail = new EmailAddress("mukhamediev.l@gmail.com", "Password Recovery");
         var client = new SendGridClient(apiKey);
         var msg = new SendGridMessage()
         {
-            From = new EmailAddress("mukhamediev.l@gmail.com", "Password Recovery"),
+            From = fromSendGridApprovedEmail,
             Subject = subject,
             PlainTextContent = message,
             HtmlContent = message
