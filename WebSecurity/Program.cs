@@ -1,6 +1,4 @@
-using System.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -16,19 +14,58 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
 
-//builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-//    .AddMicrosoftIdentityWebApp(options =>
-//    {
-//        options.ClientId = "4540dfda-2ef8-4fb9-b92e-7d9cefc56a81";
-//        options.TenantId = "b41b72d0-4e9f-4c26-8a69-f949f367c91d";
-//    });
+        // Password settings.
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 6;
+        options.Password.RequiredUniqueChars = 1;
+
+        // User settings.
+        options.User.AllowedUserNameCharacters =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        options.User.RequireUniqueEmail = false;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
 var jwtAuth = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 jwtAuth.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 jwtAuth.AddAppServicesAuthentication();
+//jwtAuth.AddApplicationCookie();
+//jwtAuth.AddExternalCookie();
+
+builder.Services.ConfigureApplicationCookie(x =>
+{
+    x.ExpireTimeSpan = TimeSpan.FromDays(7);
+    x.SlidingExpiration = true;
+});
+
+builder.Services.ConfigureExternalCookie(x =>
+{
+    x.ExpireTimeSpan = TimeSpan.FromDays(7);
+    x.SlidingExpiration = true;
+});
+
+builder.Services.AddAuthentication();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Administrators",
+        authBuilder =>
+        {
+            authBuilder.RequireRole("Administrators");
+        });
+});
+
+//builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+//{
+//    options.ValidationInterval = TimeSpan.FromDays(7);
+//});
 
 builder.Services.AddRazorPages();
 
@@ -39,28 +76,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     // This lambda determines whether user consent for non-essential cookies is needed for a given request.
     options.CheckConsentNeeded = context => true;
-    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
-});
-
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    // Password settings.
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
-
-    // Lockout settings.
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
-
-    // User settings.
-    options.User.AllowedUserNameCharacters =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-    options.User.RequireUniqueEmail = false;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
 });
 
 builder.Services.AddControllers();
