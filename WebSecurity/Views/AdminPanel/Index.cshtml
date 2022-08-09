@@ -1,7 +1,21 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Microsoft.AspNetCore.Identity
 @{
+    Layout = "/Pages/Shared/_Layout.cshtml";
 }
+@inject UserManager<IdentityUser> UserManager
 
-<h3>Admin Index view</h3>
+<h3>User list</h3>
+
+@{
+    foreach (var user in UserManager.Users)
+    {
+        <div class="card mb-3">
+            <div class="card-header">
+                Name: @user.UserName
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Email: @user.Email</h5>
+            </div>
+        </div>
+    }
+}

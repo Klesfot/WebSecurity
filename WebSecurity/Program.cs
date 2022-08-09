@@ -35,15 +35,6 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     })
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("Administrators",
-        authBuilder =>
-        {
-            authBuilder.RequireRole("Administrators");
-        });
-});
-
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 

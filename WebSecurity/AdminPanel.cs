@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebSecurity;
 
-[Authorize]
+[Authorize(Roles = "Administrators")]
 public class AdminPanel : Controller
 {
     //GET
-   [HttpGet]
-   [Authorize(Roles = "Administrators")]
+    [HttpGet]
     public IActionResult Index()
     {
         return View();
