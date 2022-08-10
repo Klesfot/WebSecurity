@@ -46,7 +46,9 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages()
+    .AddRazorRuntimeCompilation();
+builder.Services.AddWebOptimizer();
 
 var app = builder.Build();
 
@@ -60,6 +62,8 @@ else
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+app.UseWebOptimizer();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
