@@ -114,11 +114,14 @@ namespace WebSecurity.Areas.Identity.Pages.Account
             var claim = info.Principal.Claims.FirstOrDefault(c => c.Value == "Administrators");
             if (claim != null)
             {
-                var user = await _userManager.FindByNameAsync(claim.Subject.Name);
-                await _userManager.AddClaimAsync(user, claim);
+                var registeredUser = await _userManager.FindByNameAsync(claim.Subject.Name);
+                if (registeredUser != null)
+                {
+                    await _userManager.AddClaimAsync(registeredUser, claim);
+                }
             }
 
-                // Sign in the user with this external login provider if the user already has a login.
+            // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
